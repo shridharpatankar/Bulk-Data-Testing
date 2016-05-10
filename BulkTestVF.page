@@ -1,0 +1,104 @@
+<apex:page controller="BulkTestCont" title="Bulk Data Testing">
+      <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script>
+    function reloadPage(){
+        var url=window.top.location;
+        window.top.location =url;
+        }
+    
+    function makeFieldsReadonly(){
+       
+        $("input[id*=txtNumOfRec]").prop("readonly",true);
+        }
+    function makeFieldsEditable(){
+       
+        $("input[id*=txtNumOfRec]").removeProp("readonly");
+        }
+    </script>
+    <apex:form >
+       <apex:outputPanel id="messageblock">
+         <apex:pageMessages escape="false"/>
+       </apex:outputPanel>
+         
+
+   <apex:pageBlock title="Object Details">
+       <center>
+       <apex:actionStatus id="renderStatus">
+                    <apex:facet name="start">
+                        <apex:outputPanel id="opLoader"  >
+                            <apex:image value="/img/loading.gif" title="Processing..."/>
+                        </apex:outputPanel>
+                    </apex:facet>
+                    <apex:facet name="stop">
+                        <apex:outputPanel >
+                           
+                        </apex:outputPanel>
+                    </apex:facet>
+                </apex:actionStatus>
+       </center>
+            <apex:pageBlockButtons location="bottom" >
+           
+                            <apex:commandButton action="{!onSubmit}" value="Submit" reRender="messageblock,recDetailsPanel" status="renderStatus" onclick="makeFieldsReadonly()" />
+        					<apex:commandButton value="Reset" onclick="reloadPage()" title="Clear all the values in the page" immediate="true" />
+            
+ 		
+       </apex:pageBlockButtons>
+       
+       <apex:pageBlockSection collapsible="false">
+  
+           
+          <apex:selectList value="{!selectedObject}" size="1" label="Object" >
+              <apex:selectOptions value="{!sObjectNames}"/>
+              <apex:actionSupport event="onchange" immediate="false" action="{!selectObject}" reRender="recTypeList,messageblock,recDetailsPanel" status="renderStatus" onsubmit="makeFieldsEditable()" />
+           </apex:selectList>
+           
+          
+           <apex:inputText id="txtNumOfRec" value="{!noOfRec}" label="No. of Records" required="true"/>
+
+           
+           <apex:selectList id="recTypeList" value="{!selectedRecType}" size="1" label="Record Type">
+              <apex:selectOptions value="{!availableRecTypes}"/>
+           </apex:selectList>
+ 
+       
+
+       </apex:pageBlockSection>
+      
+    </apex:pageBlock>
+        <apex:outputPanel id="recDetailsPanel">
+         <apex:pageBlock title="Record Details" rendered="{! If(lFieldApiName.size==0,false,true)}">
+             <apex:pageMessage summary="Please fill all Mandatory fields(if any) before clicking on 'Create' button" severity="warning" strength="1" />
+         <center>
+         <apex:actionStatus id="renderStatusRec">
+                    <apex:facet name="start">
+                        <apex:outputPanel id="opLoader">
+                            <apex:image value="/img/loading.gif" title="Processing..."/>
+                        </apex:outputPanel>
+                    </apex:facet>
+                    <apex:facet name="stop">
+                        <apex:outputPanel >
+                           
+                        </apex:outputPanel>
+                    </apex:facet>
+                </apex:actionStatus>
+         </center>     
+         
+        <apex:pageBlockButtons rendered="{! If(lFieldApiName.size==0,false,true)}" location="top">
+      
+            <apex:outputPanel id="buttonsBlock">
+                           	<apex:commandButton value="Create"  action="{!createRec}" reRender="messageblock,buttonsBlock" status="renderStatusRec" rendered="{!isVisibleCreate}" title="Create records" />
+                           <apex:commandButton value="Update"  action="{!updateRec}" reRender="messageblock,buttonsBlock" status="renderStatusRec" rendered="{!isVisibleUpdate}" title="Update the records you created" />
+                           <apex:commandButton value="Delete"  action="{!deleteRec}" reRender="messageblock,buttonsBlock,recDetailsPanel" status="renderStatusRec" rendered="{!isVisibleDelete}" title="Delete the records you created" onclick="makeFieldsEditable()" />
+             </apex:outputPanel>                 
+       </apex:pageBlockButtons>
+
+       <apex:pageBlockSection collapsible="false" rendered="{! If(lFieldApiName.size==0,false,true)}">
+            <apex:repeat value="{!lFieldApiName}" var="f">
+            <apex:inputField value="{!sObj[f]}"/>
+            </apex:repeat>
+        </apex:pageBlockSection>
+    
+        </apex:pageBlock>
+            </apex:outputPanel>
+        </apex:form>
+</apex:page>
